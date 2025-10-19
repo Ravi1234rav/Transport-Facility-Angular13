@@ -1,0 +1,104 @@
+<div class="container">
+  <h1>{{ title }}</h1>
+  <div class="grid">
+    <section class="card">
+      <h3>Add a new ride (for today only)</h3>
+      <form #f="ngForm" (ngSubmit)="addRide()">
+        <label>Employee ID (owner)</label>
+        <input name="employeeId" [(ngModel)]="addForm.employeeId" required />
+
+        <label>Vehicle Type</label>
+        <select name="vehicleType" [(ngModel)]="addForm.vehicleType">
+          <option value="Bike">Bike</option>
+          <option value="Car">Car</option>
+        </select>
+
+        <label>Vehicle No</label>
+        <input name="vehicleNo" [(ngModel)]="addForm.vehicleNo" required />
+
+        <label>Vacant Seats</label>
+        <input
+          type="number"
+          name="vacantSeats"
+          [(ngModel)]="addForm.vacantSeats"
+          min="1"
+          required
+        />
+
+        <label>Time (HH:MM)</label>
+        <input type="time" name="time" [(ngModel)]="addForm.time" required />
+
+        <label>Pick-up Point</label>
+        <input name="pickup" [(ngModel)]="addForm.pickup" required />
+
+        <label>Destination</label>
+        <input name="destination" [(ngModel)]="addForm.destination" required />
+
+        <div class="row">
+          <button type="submit" class="btn">Add Ride</button>
+          <div class="muted">Date: {{ today }}</div>
+        </div>
+      </form>
+      <div class="message" *ngIf="message">{{ message }}</div>
+    </section>
+
+    <section class="card">
+      <h3>Search / Available Rides</h3>
+      <div class="filters">
+        <select [(ngModel)]="filterType">
+          <option value="All">All</option>
+          <option value="Bike">Bike</option>
+          <option value="Car">Car</option>
+        </select>
+
+        <input type="time" [(ngModel)]="filterTime" />
+
+        <!-- Search Button -->
+        <button type="button" (click)="applyFilters()">🔍 Search</button>
+
+        <!-- Reset Button -->
+        <button type="button" (click)="resetFilters()">Reset</button>
+      </div>
+
+      <div *ngIf="filteredRides.length === 0" class="empty">
+        No rides found for selected filters.
+      </div>
+
+      <div *ngFor="let r of filteredRides" class="ride">
+        <div class="top">
+          <strong>{{ r.vehicleType }} - {{ r.vehicleNo }}</strong>
+          <span>{{ r.time }}</span>
+        </div>
+        <div>Owner: {{ r.employeeId }} | Seats: {{ r.vacantSeats }}</div>
+        <div>From: {{ r.pickup }} → To: {{ r.destination }}</div>
+        <div class="book">
+          <input #bid placeholder="Your Employee ID to book" />
+          <button
+            (click)="bookRide(r, bid.value)"
+            [disabled]="r.vacantSeats <= 0"
+          >
+            Pick Ride
+          </button>
+        </div>
+        <div class="booked" *ngIf="r.bookings.length > 0">
+          Booked: {{ r.bookings.join(", ") }}
+        </div>
+      </div>
+    </section>
+  </div>
+  <div class="notes">
+    <strong>Notes / Rules:</strong>
+    <ul>
+      <li>Employees can only add rides for the current day ({{ today }}).</li>
+      <li>Owner's Employee ID must be unique among rides.</li>
+      <li>
+        Same employee cannot book their own ride, and cannot book the same ride
+        twice.
+      </li>
+      <li>
+        When searching by time, only rides within ±60 minutes of the selected
+        time are shown.
+      </li>
+    </ul>
+  </div>
+</div>

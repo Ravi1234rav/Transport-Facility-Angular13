@@ -1,0 +1,96 @@
+:root {
+  --bg: #f8f8f9;
+  --card: #fff;
+  --accent: #0b63ff;
+}
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+.container {
+  max-width: 980px;
+  margin: 18px auto;
+  padding: 12px;
+}
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.card {
+  background: var(--bg);
+  padding: 12px;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+.card h3 {
+  margin-top: 0;
+}
+input,
+select {
+  display: block;
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 8px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+}
+.row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+button {
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: none;
+  background: rgb(8, 8, 105) !important;
+  color: white;
+  cursor: pointer;
+}
+button[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.muted {
+  font-size: 12px;
+  color: #444;
+}
+.message {
+  margin-top: 8px;
+  padding: 8px;
+  background: #fff3cd;
+  border-radius: 6px;
+  border: 1px solid #ffeeba;
+}
+.filters {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.ride {
+  background: var(--card);
+  padding: 10px;
+  border-radius: 6px;
+  margin-bottom: 8px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+.top {
+  display: flex;
+  justify-content: space-between;
+}
+.book {
+  margin-top: 8px;
+  display: flex;
+  gap: 8px;
+}
+.booked {
+  font-size: 12px;
+  margin-top: 6px;
+}
+.notes {
+  margin-top: 18px;
+  font-size: 13px;
+  color: #333;
+}
