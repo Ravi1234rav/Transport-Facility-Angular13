@@ -94,3 +94,27 @@ button[disabled] {
   font-size: 13px;
   color: #333;
 }
+@media (max-width: 768px) {
+  .grid {
+    grid-template-columns: 1fr; /* single column on mobile */
+  }
+
+  .row {
+    flex-direction: column; /* stack buttons/input on mobile */
+    align-items: stretch;
+  }
+
+  button {
+    width: 100%; /* buttons full width */
+  }
+
+  input,
+  select {
+    width: 100%; /* inputs full width */
+  }
+
+  .book {
+    flex-direction: column;
+    gap: 4px;
+  }
+}
