@@ -1,3 +1,4 @@
+/* Root & Body */
 :root {
   --bg: #f8f8f9;
   --card: #fff;
@@ -7,10 +8,13 @@ body {
   font-family: Arial, Helvetica, sans-serif;
   margin: 0;
   padding: 0;
+  background: var(--bg);
 }
+
+/* Container & Grid */
 .container {
   max-width: 980px;
-  margin: 18px auto;
+  margin: 20px auto;
   padding: 12px;
 }
 .grid {
@@ -18,8 +22,10 @@ body {
   grid-template-columns: 1fr 1fr;
   gap: 16px;
 }
+
+/* Card */
 .card {
-  background: var(--bg);
+  background: var(--card);
   padding: 12px;
   border-radius: 8px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
@@ -27,6 +33,8 @@ body {
 .card h3 {
   margin-top: 0;
 }
+
+/* Inputs & Buttons */
 input,
 select {
   display: block;
@@ -36,22 +44,60 @@ select {
   border-radius: 6px;
   border: 1px solid #ddd;
 }
-.row {
-  display: flex;
-  gap: 12px;
-  align-items: center;
+input.ng-touched.ng-invalid,
+select.ng-touched.ng-invalid {
+  border-color: #d9534f;
+  background: #fff5f5;
 }
+
 button {
   padding: 8px 12px;
   border-radius: 6px;
   border: none;
-  background: rgb(8, 8, 105) !important;
-  color: white;
+  background: rgb(8, 8, 105) ;
+  color: #fff;
   cursor: pointer;
 }
+
 button[disabled] {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+.btn-secondary {
+  background: #f0ad4e;
+}
+
+.btn-danger {
+  background: #d9534f;
+}
+
+/* Rows & Flex */
+.row,
+.book {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* Rides & Messages */
+.ride {
+  background: var(--card);
+  padding: 10px;
+  border-radius: 6px;
+  margin-bottom: 8px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+.top {
+  display: flex;
+  justify-content: space-between;
+}
+.error {
+  color: #d9534f;
+  font-size: 13px;
+  margin-bottom: 6px;
 }
 .muted {
   font-size: 12px;
@@ -64,27 +110,6 @@ button[disabled] {
   border-radius: 6px;
   border: 1px solid #ffeeba;
 }
-.filters {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 8px;
-}
-.ride {
-  background: var(--card);
-  padding: 10px;
-  border-radius: 6px;
-  margin-bottom: 8px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
-}
-.top {
-  display: flex;
-  justify-content: space-between;
-}
-.book {
-  margin-top: 8px;
-  display: flex;
-  gap: 8px;
-}
 .booked {
   font-size: 12px;
   margin-top: 6px;
@@ -92,29 +117,72 @@ button[disabled] {
 .notes {
   margin-top: 18px;
   font-size: 13px;
-  color: #333;
 }
+
+/* Filters */
+.filters {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+/* Popup */
+.popup {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: #0b63ff;
+  color: #fff;
+  padding: 12px 20px;
+  border-radius: 6px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  animation: fadeInOut 3s forwards;
+}
+.popup span {
+  margin-right: 12px;
+}
+.close-btn {
+  background: transparent;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+}
+
+@keyframes fadeInOut {
+  0% {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  10% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  90% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+}
+
+/* Mobile Responsiveness */
 @media (max-width: 768px) {
   .grid {
-    grid-template-columns: 1fr; /* single column on mobile */
+    grid-template-columns: 1fr;
   }
-
-  .row {
-    flex-direction: column; /* stack buttons/input on mobile */
-    align-items: stretch;
-  }
-
-  button {
-    width: 100%; /* buttons full width */
-  }
-
-  input,
-  select {
-    width: 100%; /* inputs full width */
-  }
-
+  .row,
   .book {
     flex-direction: column;
-    gap: 4px;
+    align-items: stretch;
+  }
+  button,
+  input,
+  select {
+    width: 100%;
   }
 }

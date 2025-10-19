@@ -3,42 +3,92 @@
   <div class="grid">
     <section class="card">
       <h3>Add a new ride (for today only)</h3>
-      <form #f="ngForm" (ngSubmit)="addRide()">
+      <form [formGroup]="addRideForm" (ngSubmit)="addRide()">
         <label>Employee ID (owner)</label>
-        <input name="employeeId" [(ngModel)]="addForm.employeeId" required />
+        <input formControlName="employeeId" placeholder="Enter your ID" />
+        <div
+          class="error"
+          *ngIf="f['employeeId'].touched && f['employeeId'].errors?.['required']"
+        >
+          Employee ID is required.
+        </div>
 
         <label>Vehicle Type</label>
-        <select name="vehicleType" [(ngModel)]="addForm.vehicleType">
+        <select formControlName="vehicleType">
           <option value="Bike">Bike</option>
           <option value="Car">Car</option>
+          <option value="Van">Van</option>
         </select>
 
         <label>Vehicle No</label>
-        <input name="vehicleNo" [(ngModel)]="addForm.vehicleNo" required />
+        <input formControlName="vehicleNo" placeholder="Enter vehicle number" />
+        <div
+          class="error"
+          *ngIf="f['vehicleNo'].touched && f['vehicleNo'].errors?.['required']"
+        >
+          Vehicle number is required.
+        </div>
 
         <label>Vacant Seats</label>
-        <input
-          type="number"
-          name="vacantSeats"
-          [(ngModel)]="addForm.vacantSeats"
-          min="1"
-          required
-        />
+        <input type="number" formControlName="vacantSeats" min="1" />
+        <div class="error" *ngIf="f['vacantSeats'].touched">
+          <span *ngIf="f['vacantSeats'].errors?.['required']"
+            >Vacant seats required.</span
+          >
+          <span *ngIf="f['vacantSeats'].errors?.['min']"
+            >At least 1 seat required.</span
+          >
+        </div>
 
         <label>Time (HH:MM)</label>
-        <input type="time" name="time" [(ngModel)]="addForm.time" required />
+        <input type="time" formControlName="time" />
+        <div
+          class="error"
+          *ngIf="f['time'].touched && f['time'].errors?.['required']"
+        >
+          Time is required.
+        </div>
 
         <label>Pick-up Point</label>
-        <input name="pickup" [(ngModel)]="addForm.pickup" required />
+        <input formControlName="pickup" placeholder="Enter pick-up point" />
+        <div
+          class="error"
+          *ngIf="f['pickup'].touched && f['pickup'].errors?.['required']"
+        >
+          Pick-up point is required.
+        </div>
 
         <label>Destination</label>
-        <input name="destination" [(ngModel)]="addForm.destination" required />
+        <input formControlName="destination" placeholder="Enter destination" />
+        <div
+          class="error"
+          *ngIf="f['destination'].touched && f['destination'].errors?.['required']"
+        >
+          Destination is required.
+        </div>
 
         <div class="row">
-          <button type="submit" class="btn">Add Ride</button>
+          <button type="submit" class="btn" [disabled]="addRideForm.invalid">
+            {{ isEditMode ? "Update Ride" : "Add Ride" }}
+          </button>
+
+          <!-- Cancel Edit Button -->
+          <button
+            type="button"
+            class="btn"
+            *ngIf="isEditMode"
+            (click)="
+              isEditMode = false;
+              editingIndex = null;
+              addRideForm.reset({ vehicleType: 'Bike', vacantSeats: 1 })
+            "
+          >
+            Cancel
+          </button>
           <div class="muted">Date: {{ today }}</div>
         </div>
       </form>
+
       <div class="message" *ngIf="message">{{ message }}</div>
     </section>
 
@@ -49,8 +99,10 @@
           <option value="All">All</option>
           <option value="Bike">Bike</option>
           <option value="Car">Car</option>
+          <option value="Van">Van</option>
         </select>
-
+      
+        <label>Time (HH:MM)</label>
         <input type="time" [(ngModel)]="filterTime" />
 
         <!-- Search Button -->
@@ -64,7 +116,7 @@
         No rides found for selected filters.
       </div>
 
-      <div *ngFor="let r of filteredRides" class="ride">
+      <div *ngFor="let r of filteredRides; let i = index" class="ride">
         <div class="top">
           <strong>{{ r.vehicleType }} - {{ r.vehicleNo }}</strong>
           <span>{{ r.time }}</span>
@@ -79,7 +131,15 @@
           >
             Pick Ride
           </button>
+
+          <button type="button" class="btn-secondary" (click)="editRide(i)">
+            Edit
+          </button>
+          <button type="button" class="btn-danger" (click)="deleteRide(i)">
+            Delete
+          </button>
         </div>
+
         <div class="booked" *ngIf="r.bookings.length > 0">
           Booked: {{ r.bookings.join(", ") }}
         </div>
@@ -102,3 +162,9 @@
     </ul>
   </div>
 </div>
+<!-- Popup Message -->
+<div class="popup" *ngIf="popupMessage">
+  <span>{{ popupMessage }}</span>
+  <button class="close-btn" (click)="closePopup()">✖</button>
+</div>
+

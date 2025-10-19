@@ -1,16 +1,15 @@
 import { Component, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 interface Ride {
-  id: string;
-  employeeId: string; // owner
-  vehicleType: 'Bike' | 'Car';
+  employeeId: string;
+  vehicleType: string;
   vehicleNo: string;
   vacantSeats: number;
-  time: string; // HH:MM
+  time: string;
   pickup: string;
   destination: string;
-  date: string; // YYYY-MM-DD
-  bookings: string[]; // employeeIds who booked
+  bookings: string[];
 }
 
 @Component({
@@ -18,121 +17,151 @@ interface Ride {
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css'],
 })
-export class AppComponent {
-  title = 'Transport Facility Management';
-
-  today = new Date().toLocaleDateString();
-
-  // Add form model
-  addForm = {
-    employeeId: '',
-    vehicleType: 'Car',
-    vehicleNo: '',
-    vacantSeats: 1,
-    time: '',
-    pickup: '',
-    destination: '',
-  };
-
+export class AppComponent implements OnInit {
+  title = 'Transport Facility';
+  today = new Date().toISOString().split('T')[0];
   message = '';
-  rides: any[] = [];
-  filteredRides: any[] = [];
+  addRideForm!: FormGroup;
+  rides: Ride[] = [];
+  filteredRides: Ride[] = [];
   filterType: string = 'All';
   filterTime: string = '';
+  isEditMode = false;
+  editingIndex: number | null = null;
 
-  constructor() {}
+  constructor(private fb: FormBuilder) {}
 
-  ngOnInit() {
-    this.loadRides();
-  }
-
-  addRide() {
-    const exists = this.rides.find(
-      (r) => r.employeeId === this.addForm.employeeId
-    );
-    if (exists) {
-      this.message = 'Employee ID already has a ride.';
-      return;
-    }
-
-    const newRide = {
-      ...this.addForm,
-      bookings: [],
-    };
-    this.rides.push(newRide);
-    this.saveRides();
-    this.filterRides();
-    this.message = 'Ride added successfully!';
-  }
-
-  bookRide(ride: any, empId: string) {
-    if (!empId) return alert('Enter Employee ID to book.');
-    if (ride.employeeId === empId)
-      return alert('You cannot book your own ride.');
-    if (ride.bookings.includes(empId))
-      return alert('You have already booked this ride.');
-    if (ride.vacantSeats <= 0) return alert('No seats left.');
-
-    ride.bookings.push(empId);
-    ride.vacantSeats--;
-    this.saveRides();
-    this.filterRides();
-  }
-
-  applyFilters() {
-    this.filteredRides = this.rides.filter((r) => {
-      const matchType =
-        this.filterType === 'All' || r.vehicleType === this.filterType;
-
-      const matchTime =
-        !this.filterTime || this.isWithinTimeRange(this.filterTime, r.time, 60);
-
-      return matchType && matchTime;
+  ngOnInit(): void {
+    this.addRideForm = this.fb.group({
+      employeeId: ['', Validators.required],
+      vehicleType: ['Bike', Validators.required],
+      vehicleNo: ['', Validators.required],
+      vacantSeats: [1, [Validators.required, Validators.min(1)]],
+      time: ['', Validators.required],
+      pickup: ['', Validators.required],
+      destination: ['', Validators.required],
     });
-  }
 
-  // Reset filters
-  resetFilters() {
-    this.filterType = 'All';
-    this.filterTime = '';
     this.filteredRides = this.rides;
   }
 
-  // ±60 minutes logic
-  isWithinTimeRange(selected: string, rideTime: string, bufferMinutes: number) {
-    const [sh, sm] = selected.split(':').map(Number);
-    const [rh, rm] = rideTime.split(':').map(Number);
-    const selectedMins = sh * 60 + sm;
-    const rideMins = rh * 60 + rm;
-    return Math.abs(selectedMins - rideMins) <= bufferMinutes;
+  popupMessage: string = '';
+
+  private showMessage(msg: string, duration: number = 3000): void {
+    this.popupMessage = msg;
+    setTimeout(() => (this.popupMessage = ''), duration);
   }
 
-  filterRides() {
-    this.filteredRides = this.rides.filter((r) => {
-      if (this.filterType !== 'All' && r.vehicleType !== this.filterType)
-        return false;
-      if (this.filterTime) {
-        const rideTime = this.timeToMinutes(r.time);
-        const filterTime = this.timeToMinutes(this.filterTime);
-        const diff = Math.abs(rideTime - filterTime);
-        if (diff > 60) return false; // ±60 mins
+  closePopup(): void {
+    this.popupMessage = '';
+  }
+
+  get f() {
+    return this.addRideForm.controls;
+  }
+
+  addRide(): void {
+    if (this.addRideForm.invalid) return;
+
+    const formValue = this.addRideForm.value;
+
+    if (this.isEditMode && this.editingIndex !== null) {
+      // Update existing ride
+      this.rides[this.editingIndex] = {
+        ...this.rides[this.editingIndex],
+        ...formValue,
+      };
+      this.isEditMode = false;
+      this.editingIndex = null;
+      this.showMessage('Ride Updated successfully!');
+    } else {
+      // Check unique Employee ID
+      const exists = this.rides.some(
+        (r) => r.employeeId === formValue.employeeId
+      );
+      if (exists) {
+        this.showMessage('Employee ID already has a ride.');
+        return;
       }
-      return true;
+
+      const newRide: Ride = {
+        ...formValue,
+        bookings: [],
+      };
+
+      this.rides.push(newRide);
+      this.showMessage('Ride added successfully!');
+    }
+
+    this.addRideForm.reset({ vehicleType: 'Bike', vacantSeats: 1 });
+    this.filteredRides = [...this.rides];
+  }
+
+  editRide(index: number): void {
+    this.isEditMode = true;
+    this.editingIndex = index;
+    const ride = this.rides[index];
+    this.addRideForm.patchValue(ride);
+    this.message = '';
+  }
+
+  deleteRide(index: number): void {
+    if (confirm('Are you sure you want to delete this ride?')) {
+      this.rides.splice(index, 1);
+      this.filteredRides = [...this.rides];
+      this.showMessage('Ride deleted successfully!');
+      this.isEditMode = false;
+      this.editingIndex = null;
+    }
+  }
+
+  bookRide(ride: Ride, empId: string): void {
+    if (!empId.trim()) {
+      this.showMessage('Employee ID required to book.');
+      return;
+    }
+    if (ride.employeeId === empId) {
+      this.showMessage('You cannot book your own ride.');
+      return;
+    }
+    if (ride.bookings.includes(empId)) {
+      this.showMessage('You already booked this ride.');
+      return;
+    }
+    if (ride.vacantSeats <= 0) {
+      this.showMessage('No seats available.');
+      return;
+    }
+
+    ride.bookings.push(empId);
+    ride.vacantSeats--;
+    this.showMessage(`Ride booked successfully by ${empId}.`);
+  }
+
+  applyFilters(): void {
+    this.filteredRides = this.rides.filter((ride) => {
+      const typeMatch =
+        this.filterType === 'All' || ride.vehicleType === this.filterType;
+
+      let timeMatch = true;
+      if (this.filterTime) {
+        const rideTime = this.timeToMinutes(ride.time);
+        const filterTime = this.timeToMinutes(this.filterTime);
+        timeMatch = Math.abs(rideTime - filterTime) <= 60;
+      }
+
+      return typeMatch && timeMatch;
     });
   }
 
-  saveRides() {
-    localStorage.setItem('rides', JSON.stringify(this.rides));
+  resetFilters(): void {
+    this.filterType = 'All';
+    this.filterTime = '';
+    this.filteredRides = [...this.rides];
   }
 
-  loadRides() {
-    const stored = localStorage.getItem('rides');
-    this.rides = stored ? JSON.parse(stored) : [];
-    this.filterRides();
-  }
-
-  timeToMinutes(t: string): number {
-    const [h, m] = t.split(':').map(Number);
+  private timeToMinutes(time: string): number {
+    const [h, m] = time.split(':').map(Number);
     return h * 60 + m;
   }
 }
